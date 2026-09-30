@@ -10,17 +10,35 @@ Hệ thống hoạt động theo mô hình 5 tầng khép kín:
 
 ```mermaid
 flowchart LR
-    A["Người dùng<br/>(Element Web :8080)"] -->|Chat Matrix| B[" OpenClaw Gateway<br/>(Docker Matrix Bot)"]
-    B -->|1. Gọi MCP Tool (SSE)| C["MCP Server<br/>(:8005/sse)"]
-    C -->|2. Query GraphQL (HTTP POST)| D["GraphQL Server<br/>(:8002/graphql)"]
-    D -->|3. Gọi REST nội bộ| E["REST API Server<br/>(:8001/api)"]
-    E -->|4. Lấy dữ liệu công khai| F["Internet APIs<br/>(Open-Meteo & Apple iTunes)"]
-    
-    F -.->|Trả JSON thô| E
-    E -.->|Trả REST Model| D
-    D -.->|Tổng hợp dữ liệu| C
-    C -.->|Trả Text kết quả Tool| B
-    B -.->|Sinh câu trả lời hoàn chỉnh| A
+    A["Người dùng<br/>Element Web :8080"] -->|"Chat Matrix"| B["OpenClaw Gateway<br/>Docker Matrix Bot"]
+    B -->|"1. Gọi Tool qua SSE"| C["MCP Server<br/>:8005/sse"]
+    C -->|"2. Query GraphQL"| D["GraphQL Server<br/>:8002/graphql"]
+    D -->|"3. Gọi REST nội bộ"| E["REST API Server<br/>:8001/api"]
+    E -->|"4. Lấy dữ liệu công khai"| F["Internet APIs<br/>Open-Meteo & Apple iTunes"]
+```
+
+### Luồng tương tác tuần tự (Request - Response Flow):
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Người dùng (Element Web)
+    participant Bot as OpenClaw Gateway (Matrix Bot)
+    participant MCP as MCP Server (:8005)
+    participant GQL as GraphQL Server (:8002)
+    participant REST as REST API Server (:8001)
+    participant API as Public Internet APIs
+
+    User->>Bot: Gửi tin nhắn ("5 bài nhạc của Đen Vâu")
+    Bot->>MCP: Gọi Tool search_music(query, limit) qua SSE
+    MCP->>GQL: HTTP POST Query searchMusic
+    GQL->>REST: HTTP GET /api/music?query=...&limit=5
+    REST->>API: Gọi Apple iTunes Search API
+    API-->>REST: Trả dữ liệu JSON thô
+    REST-->>GQL: Trả danh sách bài hát chuẩn hóa
+    GQL-->>MCP: Trả kết quả GraphQL Object
+    MCP-->>Bot: Trả chuỗi text kết quả Tool
+    Bot-->>User: Phản hồi tin nhắn kèm link nghe nhạc trực tiếp
 ```
 
 ### Các bước xử lý chi tiết:
