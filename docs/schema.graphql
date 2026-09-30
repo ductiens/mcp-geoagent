@@ -1,0 +1,21 @@
+type MusicTrack {
+  trackName: String!
+  artistName: String!
+  albumName: String!
+  previewUrl: String
+}
+
+type Query {
+  """Get real-time weather by city name"""
+  weather(city: String!): Weather!
+
+  """Search songs by title or artist keyword"""
+  searchMusic(query: String!, limit: Int! = 3): [MusicTrack!]!
+}
+
+type Weather {
+  city: String!
+  temperature: Float!
+  humidity: Int!
+  windSpeed: Float!
+}

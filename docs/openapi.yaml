@@ -1,0 +1,143 @@
+openapi: 3.1.0
+info:
+  title: REST API
+  version: 0.1.0
+paths:
+  /api/weather:
+    get:
+      summary: Get Weather
+      operationId: get_weather_api_weather_get
+      parameters:
+      - name: city
+        in: query
+        required: true
+        schema:
+          type: string
+          title: City
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeatherResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/music:
+    get:
+      summary: Search Music
+      operationId: search_music_api_music_get
+      parameters:
+      - name: query
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Query
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 3
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MusicTrackResponse'
+                title: Response Search Music Api Music Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    MusicTrackResponse:
+      properties:
+        track_name:
+          type: string
+          title: Track Name
+        artist_name:
+          type: string
+          title: Artist Name
+        album_name:
+          type: string
+          title: Album Name
+        preview_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Preview Url
+      type: object
+      required:
+      - track_name
+      - artist_name
+      - album_name
+      title: MusicTrackResponse
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    WeatherResponse:
+      properties:
+        city:
+          type: string
+          title: City
+        temperature:
+          type: number
+          title: Temperature
+        humidity:
+          type: integer
+          title: Humidity
+        wind_speed:
+          type: number
+          title: Wind Speed
+      type: object
+      required:
+      - city
+      - temperature
+      - humidity
+      - wind_speed
+      title: WeatherResponse
