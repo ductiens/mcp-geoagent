@@ -1,10 +1,28 @@
+import sys
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import requests
 import uvicorn
+from tracing import setup_tracer, instrument_fastapi_app
+from config import (
+    OPEN_METEO_GEOCODING_URL,
+    OPEN_METEO_FORECAST_URL,
+    ITUNES_SEARCH_URL,
+    REST_SERVER_HOST,
+    REST_SERVER_PORT,
+)
 
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
+tracer = setup_tracer("rest-server")
 app = FastAPI(title="REST API")
+instrument_fastapi_app(app)
 
 # Schema
 class WeatherResponse(BaseModel):
@@ -24,7 +42,7 @@ class MusicTrackResponse(BaseModel):
 def get_weather(city: str):
     # 1. Tìm tọa độ theo tên thành phố
     geo = requests.get(
-        "https://geocoding-api.open-meteo.com/v1/search",
+        OPEN_METEO_GEOCODING_URL,
         params={"name": city, "count": 1},
         timeout=10,
     ).json()
@@ -34,7 +52,7 @@ def get_weather(city: str):
 
     # 2. Lấy thời tiết từ tọa độ
     cur = requests.get(
-        "https://api.open-meteo.com/v1/forecast",
+        OPEN_METEO_FORECAST_URL,
         params={
             "latitude": loc["latitude"],
             "longitude": loc["longitude"],
@@ -54,7 +72,7 @@ def get_weather(city: str):
 def search_music(query: str, limit: int = 3):
     try:
         rows = requests.get(
-            "https://itunes.apple.com/search",
+            ITUNES_SEARCH_URL,
             params={"term": query, "entity": "song", "country": "VN", "limit": limit},
             timeout=10,
         ).json().get("results", [])
@@ -72,4 +90,4 @@ def search_music(query: str, limit: int = 3):
     ]
 
 if __name__ == "__main__":
-    uvicorn.run("rest_server.main:app", host="127.0.0.1", port=8001)
+    uvicorn.run("rest_server.main:app", host=REST_SERVER_HOST, port=REST_SERVER_PORT)

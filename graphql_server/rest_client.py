@@ -1,6 +1,5 @@
 import requests
-
-REST_API_URL = "http://127.0.0.1:8001"
+from config import REST_API_URL
 
 
 def get_weather(city: str) -> dict:
@@ -8,7 +7,7 @@ def get_weather(city: str) -> dict:
     res = requests.get(
         f"{REST_API_URL}/api/weather",
         params={"city": city},
-        timeout=10,
+        timeout=25,
     )
     if res.status_code == 404:
         raise ValueError(f"Không tìm thấy thành phố: {city}")
@@ -21,7 +20,7 @@ def search_music(query: str, limit: int = 3) -> list:
     res = requests.get(
         f"{REST_API_URL}/api/music",
         params={"query": query, "limit": limit},
-        timeout=10,
+        timeout=25,
     )
     res.raise_for_status()
     return res.json()

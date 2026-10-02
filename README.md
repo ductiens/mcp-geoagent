@@ -71,9 +71,34 @@ my-mcp-server/
 │
 ├── docs/                         # TÀI LIỆU & SCHEMA SPECIFICATIONS
 │   ├── openapi.yaml              # Đặc tả chuẩn OpenAPI 3.1 của REST API
-│   └── schema.graphql            # Đặc tả chuẩn GraphQL Schema
+│   ├── schema.graphql            # Đặc tả chuẩn GraphQL Schema
+│   └── OPENCLAW_SYNAPSE_MCP_GUIDE.md # Hướng dẫn chi tiết cấu hình OpenClaw, Synapse Matrix và MCP Server
 │
+├── config.py                     # Module tập trung nạp và quản lý cấu hình từ .env
+├── tracing.py                    # Khởi tạo OpenTelemetry & tích hợp Jaeger OTLP
+├── .env                          # File lưu các biến môi trường thực tế (URLs, ports, secrets)
+├── .env.example                  # File mẫu định nghĩa các biến môi trường
 ├── requirements.txt              # Danh sách thư viện Python cần thiết
 └── README.md                     # Tài liệu hướng dẫn kiến trúc & vận hành
 ```
+
+---
+
+## 3. Cấu hình biến môi trường (`.env`)
+
+Toàn bộ URL nội bộ, URL công khai bên ngoài, cấu hình Keycloak và Jaeger đều được quản lý tập trung thông qua file `.env`:
+
+| Biến môi trường | Mặc định | Mô tả |
+| :--- | :--- | :--- |
+| `REST_SERVER_HOST` / `PORT` | `127.0.0.1` / `8001` | Host và Port của REST API Server |
+| `GRAPHQL_SERVER_HOST` / `PORT` | `127.0.0.1` / `8002` | Host và Port của GraphQL Server |
+| `MCP_SERVER_HOST` / `PORT` | `0.0.0.0` / `8005` | Host và Port của MCP Server |
+| `REST_API_URL` | `http://127.0.0.1:8001` | URL REST API để GraphQL Server gọi |
+| `GRAPHQL_URL` | `http://127.0.0.1:8002/graphql` | URL GraphQL để MCP Server gọi |
+| `OPEN_METEO_GEOCODING_URL` | `https://geocoding-api.open-meteo.com/v1/search` | API tìm tọa độ theo tên thành phố |
+| `OPEN_METEO_FORECAST_URL` | `https://api.open-meteo.com/v1/forecast` | API lấy thông tin thời tiết |
+| `ITUNES_SEARCH_URL` | `https://itunes.apple.com/search` | API tìm kiếm bài hát Apple iTunes |
+| `KEYCLOAK_URL` | `http://localhost:8090` | Địa chỉ máy chủ Keycloak Identity Provider |
+| `KEYCLOAK_REALM` | `geoagent` | Tên Realm trên Keycloak |
+| `JAEGER_OTLP_ENDPOINT` | `http://localhost:4318/v1/traces` | Endpoint gửi OpenTelemetry Traces sang Jaeger |
 
